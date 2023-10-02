@@ -92,9 +92,11 @@ int main()
     {
         double newTheta[M];
 
+#pragma omp parallel for
         for (int k = 0; k < M; k++)
         {
             double t = 0;
+#pragma omp parallel for reduction(+ : t)
             for (int n = 0; n < N; n++)
             {
                 double h = 0;
@@ -108,6 +110,7 @@ int main()
             newTheta[k] = t;
         }
 
+#pragma omp parallel for
         for (int i = 0; i < M; i++)
             theta[i] = newTheta[i];
     }

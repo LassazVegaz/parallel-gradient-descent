@@ -23,7 +23,7 @@ double f(double *x, double *theta)
     return result;
 }
 
-void init(double inputs[N][M], double outputs[N], double theta[M])
+void init(double **inputs, double *outputs, double *theta)
 {
     srand(time(NULL));
 
@@ -57,7 +57,7 @@ void checkThetaAccuracy(double *theta, double *actualTheta)
         printf("Thetas are not accurate\n");
 }
 
-void printError(double inputs[N][M], double outputs[N], double *theta)
+void printError(double **inputs, double *outputs, double *theta)
 {
     double error = 0;
     for (int n = 0; n < N; n++)
@@ -81,17 +81,23 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int localN = N / size;
 
-    double inputs[N][M];
-    double outputs[N];
-    double actualTheta[M];
+    double **inputs;
+    double *outputs;
+    double *actualTheta;
 
     // theta are the coefficients we are trying to find
-    double theta[M];
+    double *theta = malloc(sizeof(double) * M);
 
     // init inputs, outputs and actual thetas in rank 0
     if (rank == 0)
     {
+        inputs = malloc(sizeof(double *) * N);
+        for (int i = 0; i < N; i++)
+            inputs[i] = malloc(sizeof(double) * M);
+        outputs = malloc(sizeof(double) * N);
+        actualTheta = malloc(sizeof(double) * M);
         init(inputs, outputs, actualTheta);
+
         for (int i = 0; i < M; i++)
             theta[i] = 0;
     }
@@ -170,7 +176,7 @@ int main()
         }
     }
 
-    for (int i = 0; i < M; i++)
+    for (int i = 0; i < localN; i++)
         free(localInputs[i]);
     free(localInputs);
     free(localOutputs);
@@ -183,6 +189,13 @@ int main()
         // check error
         printError(inputs, outputs, theta);
     }
+
+    for (int i = 0; i < N; i++)
+        free(inputs[i]);
+    free(inputs);
+    free(outputs);
+    free(actualTheta);
+    free(theta);
 
     MPI_Finalize();
 

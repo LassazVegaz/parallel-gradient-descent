@@ -81,8 +81,6 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int localN = N / size;
 
-    printf("size = %d\n", size);
-
     double inputs[N][M];
     double outputs[N];
     double actualTheta[M];
@@ -90,6 +88,7 @@ int main()
     // theta are the coefficients we are trying to find
     double theta[M];
 
+    // init inputs, outputs and actual thetas in rank 0
     if (rank == 0)
     {
         init(inputs, outputs, actualTheta);
@@ -97,11 +96,15 @@ int main()
             theta[i] = 0;
     }
 
-    double **localInputs = (double **)malloc(sizeof(double *) * localN);
+    // dynamic arrays to store inputs and outputs in each rank
+    double **localInputs = (double **)malloc(sizeof(double *) * localN); // a multi array
     for (int i = 0; i < localN; i++)
         localInputs[i] = (double *)malloc(sizeof(double) * M);
     double *localOutputs = (double *)malloc(sizeof(double) * localN);
 
+    // send each input row to other ranks
+    // a multidim array cannot be sent as a whole in MPI
+    // but still this is efficient
     if (rank == 0)
     {
         for (int i = 0; i < localN; i++)
@@ -125,37 +128,14 @@ int main()
             MPI_Recv(localInputs[i], M, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
         }
     }
+
+    // scatter outputs
     MPI_Scatter(outputs, localN, MPI_DOUBLE, localOutputs, localN, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    // printf("Inputs outputs recieved by %d:\n", rank);
-    // for (int _i = 0; _i < localN; _i++)
-    // {
-    //     printf("output - %lf : inputs - ", localOutputs[_i]);
-    //     for (int _j = 0; _j < M; _j++)
-    //         printf("%lf ", localInputs[_i][_j]);
-    //     printf("\n");
-    // }
-
-    // for (int i = 0; i < localN; i++)
-    // {
-    //     if (localOutputs[i] != outputs[i])
-    //         puts("outputs dont match");
-    // }
-    // puts("outputs checking over...");
 
     for (int i = 0; i < MAX_ITERATIONS; i++)
     {
-        // printf("Thetas sending by %d: ", rank);
-        // for (int _i = 0; _i < M; _i++)
-        //     printf("%lf ", theta[_i]);
-        // printf("\n");
-
+        // for iteration, thetas are updated. therefore distribute them
         MPI_Bcast(theta, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-        // printf("Thetas recieved by %d: ", rank);
-        // for (int _i = 0; _i < M; _i++)
-        //     printf("%lf ", theta[_i]);
-        // printf("\n");
 
         double newTheta[M];
 
@@ -172,6 +152,7 @@ int main()
                 localT += (h - localOutputs[n]) * localInputs[n][k];
             }
 
+            // reduce all totals into one
             double t = 0;
             MPI_Reduce(&localT, &t, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 

@@ -98,7 +98,7 @@ int main()
     }
 
     double **localInputs = (double **)malloc(sizeof(double *) * localN);
-    for (int i = 0; i < M; i++)
+    for (int i = 0; i < localN; i++)
         localInputs[i] = (double *)malloc(sizeof(double) * M);
     double *localOutputs = (double *)malloc(sizeof(double) * localN);
 

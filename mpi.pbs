@@ -3,7 +3,7 @@
 #PBS -j oe
 
 cat $PBS_NODEFILE
-NPROC=1
+NPROC=2
 cd $PBS_O_WORKDIR
 MPISIZE=$NPROC
 MPIPROG=`basename $PBS_JOBNAME .pbs`

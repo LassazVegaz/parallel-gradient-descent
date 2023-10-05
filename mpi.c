@@ -107,10 +107,7 @@ int main()
     // but still this is efficient
     if (rank == 0)
     {
-        for (int i = 0; i < localN; i++)
-            localInputs[i] = inputs[i];
-
-        for (int i = localN; i < N;)
+        for (int i = 0; i < N;)
         {
             int upper = i + localN;
             int dest = i / localN;
@@ -125,13 +122,11 @@ int main()
             }
         }
     }
-    else
+    // gathering sent inputs
+    for (int i = 0; i < localN; i++)
     {
-        for (int i = 0; i < localN; i++)
-        {
-            MPI_Status status;
-            MPI_Recv(localInputs[i], M, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-        }
+        MPI_Status status;
+        MPI_Recv(localInputs[i], M, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
     }
 
     // scatter outputs
@@ -175,9 +170,8 @@ int main()
         }
     }
 
-    if (rank != 0)
-        for (int i = 0; i < M; i++)
-            free(localInputs[i]);
+    for (int i = 0; i < M; i++)
+        free(localInputs[i]);
     free(localInputs);
     free(localOutputs);
 

@@ -8,7 +8,7 @@
 
 #define M 10
 #define N 1000
-#define MAX_ITERATIONS 10000
+#define MAX_ITERATIONS 1000
 #define ALPHA 0.1
 #define ACCURACY_TORLERANCE 0.0
 
@@ -212,3 +212,5 @@ int main()
 
     return 0;
 }
+
+// Time taken = 0.232665

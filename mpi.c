@@ -108,6 +108,10 @@ int main()
         localInputs[i] = (double *)malloc(sizeof(double) * M);
     double *localOutputs = (double *)malloc(sizeof(double) * localN);
 
+    // time should be counted from here because data spread if part of MPI
+    // if it wasnt MPI, data doesnt need to be spread
+    double startTime = MPI_Wtime();
+
     // send each input row to other ranks
     // a multidim array cannot be sent as a whole in MPI
     // but still this is efficient
@@ -176,6 +180,8 @@ int main()
         }
     }
 
+    double endTime = MPI_Wtime();
+
     for (int i = 0; i < localN; i++)
         free(localInputs[i]);
     free(localInputs);
@@ -183,6 +189,8 @@ int main()
 
     if (rank == 0)
     {
+        printf("Time taken = %lf\n", endTime - startTime);
+
         // check if thetas are accurate
         checkThetaAccuracy(theta, actualTheta);
 
@@ -190,12 +198,15 @@ int main()
         printError(inputs, outputs, theta);
     }
 
-    for (int i = 0; i < N; i++)
-        free(inputs[i]);
-    free(inputs);
-    free(outputs);
-    free(actualTheta);
-    free(theta);
+    if (rank == 0)
+    {
+        for (int i = 0; i < N; i++)
+            free(inputs[i]);
+        free(inputs);
+        free(outputs);
+        free(actualTheta);
+        free(theta);
+    }
 
     MPI_Finalize();
 

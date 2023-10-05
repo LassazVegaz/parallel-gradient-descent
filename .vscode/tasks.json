@@ -43,7 +43,7 @@
         {
             "type": "process",
             "label": "DC Compile MPI",
-            "command": "/glob/development-tools/versions/oneapi/2023.2.0.1/oneapi/mpi/2021.10.0//bin/mpiicpc",
+            "command": "/glob/development-tools/versions/oneapi/2023.2.0.1/oneapi/mpi/2021.10.0//bin/mpiicc",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
@@ -60,7 +60,7 @@
             "group": {
                 "kind": "build",
             },
-            "detail": "compiler: mpiicpc"
+            "detail": "compiler: mpiicc"
         },
         {
             "type": "process",

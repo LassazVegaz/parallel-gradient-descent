@@ -1,0 +1,49 @@
+
+########################################################################
+#      Date:           Thu 05 Oct 2023 01:57:01 AM PDT
+#    Job ID:           2382214.v-qsvr-1.aidevcloud
+#      User:           u200380
+# Resources:           cput=75:00:00,neednodes=2:ppn=2,nodes=2:ppn=2,walltime=00:02:00
+########################################################################
+
+s001-n007
+s001-n007
+s001-n078
+s001-n078
+Running MPI program mpi on 20 processes
+Started at Thu 05 Oct 2023 01:57:07 AM PDT
+--------------------------------------------------------------------------------
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+size = 20
+Thetas are accurate
+error: 0.000000
+
+real	0m3.714s
+user	0m20.944s
+sys	0m4.265s
+--------------------------------------------------------------------------------
+Finished at Thu 05 Oct 2023 01:57:10 AM PDT
+
+########################################################################
+# End of output for job 2382214.v-qsvr-1.aidevcloud
+# Date: Thu 05 Oct 2023 01:57:11 AM PDT
+########################################################################
+

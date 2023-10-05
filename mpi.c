@@ -116,7 +116,12 @@ int main()
             int dest = i / localN;
             for (; i < upper; i++)
             {
-                MPI_Ssend(inputs[i], M, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
+                int buffSize = sizeof(double) * M + MPI_BSEND_OVERHEAD;
+                double *buff = malloc(buffSize);
+                MPI_Buffer_attach(buff, buffSize);
+                MPI_Bsend(inputs[i], M, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
+                MPI_Buffer_detach(buff, &buffSize);
+                free(buff);
             }
         }
     }

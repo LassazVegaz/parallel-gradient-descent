@@ -7,7 +7,7 @@
 // f(x1, x2, x3, ..., xM) = theta0 * x0 + theta1 * x1 + theta2 * x2 + ... + thetaM * xM
 
 #define M 10
-#define N 1008
+#define N 1000
 #define MAX_ITERATIONS 1000
 #define ALPHA 0.1
 #define ACCURACY_TORLERANCE 0.001
@@ -79,6 +79,7 @@ int main()
     MPI_Init(NULL, NULL);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int localN = N / size;
 
     double inputs[N][M];
     double outputs[N];
@@ -96,26 +97,46 @@ int main()
 
     for (int i = 0; i < MAX_ITERATIONS; i++)
     {
+        MPI_Bcast(theta, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
         double newTheta[M];
 
         for (int k = 0; k < M; k++)
         {
-            double t = 0;
-            for (int n = 0; n < N; n++)
+            double *localInputs = (double *)malloc(sizeof(double) * localN);
+            double *localOutputs = (double *)malloc(sizeof(double) * localN);
+            MPI_Scatter(inputs, localN, MPI_DOUBLE, localInputs, localN, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Scatter(inputs, localN, MPI_DOUBLE, localOutputs, localN, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+            double localT = 0;
+            for (int n = 0; n < localN; n++)
             {
                 double h = 0;
                 for (int i = 0; i < M; i++)
                 {
                     h += inputs[n][i] * theta[i];
                 }
-                t += (h - outputs[n]) * inputs[n][k];
+                localT += (h - outputs[n]) * inputs[n][k];
             }
-            t = theta[k] - ALPHA * t / N;
-            newTheta[k] = t;
+
+            free(localInputs);
+            free(localOutputs);
+
+            double t = 0;
+            MPI_Reduce(&localT, &t, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+            if (rank == 0)
+            {
+                t = theta[k] - ALPHA * localT / N;
+                newTheta[k] = localT;
+            }
         }
 
-        for (int i = 0; i < M; i++)
-            theta[i] = newTheta[i];
+        if (rank == 0)
+        {
+            for (int i = 0; i < M; i++)
+                theta[i] = newTheta[i];
+        }
     }
 
     if (rank == 0)

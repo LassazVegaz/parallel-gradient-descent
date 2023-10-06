@@ -96,7 +96,7 @@ int main()
         for (int k = 0; k < M; k++)
         {
             double t = 0;
-#pragma omp parallel for reduction(+ : t)
+#pragma omp parallel for reduction(+ : t) schedule(guided, 100)
             for (int n = 0; n < N; n++)
             {
                 double h = 0;

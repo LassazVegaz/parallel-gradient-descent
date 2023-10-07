@@ -6,7 +6,7 @@ This is the parallel version of the gradient descent algorithm, implemented in C
 ## Gradient Descent
 
 The gradient descent algorithm is an iterative optimization algorithm used to minimize a function by 
-iteratively moving in the direction of steepest descent as defined by the negative of the gradient. 
+iteratively moving in the direction of the steepest descent as defined by the negative of the gradient. 
 The algorithm is commonly used in machine learning and artificial intelligence to optimize models and 
 minimize loss functions.
 
@@ -33,11 +33,11 @@ programming. Enjoy!
 
 ### Environment
 
-I used an Intel DevCloud environment to test the OpenMP version of the program. Search for Intel DevCloud and create an account. The Intel DevCloud has a Linux environment with the Intel C/C++ compiler and other nessesary tools for parallel programming.
+I used an Intel DevCloud environment for this project. The link for it is in the references section. The Intel DevCloud has a Linux environment with the Intel C/C++ compiler and other necessary tools for parallel programming. You can create a free account there.
 
 If you are using VS Code, there is a way to code in the Intel DevCloud using VS Code. They have instructions for that. If you follow their instructions you will find a way to easily code in the DevCloud environment using VS Code.
 
-I also have created some VS Code tasks to compile and run some C/C++ files for VS Code users. Tasks name are self-explanatory. Check them out.
+I also have created some VS Code tasks to compile and run some C/C++ files for VS Code users. Tasks' names are self-explanatory. Check them out.
 
 ### Serial
 
@@ -69,7 +69,7 @@ qsub omp.pbs
 
 ### MPI
 
-[mpi.c](./mpi.c) contains the MPI version of the program. Comiple it by running:
+[mpi.c](./mpi.c) contains the MPI version of the program. Compile it by running:
 
 ```bash
 mpicc -o mpi mpi.c
@@ -91,12 +91,14 @@ not yet implemented
 
 ## References
 
-[1] [Gradient Descent](https://en.wikipedia.org/wiki/Gradient_descent)
+- [Gradient Descent](https://en.wikipedia.org/wiki/Gradient_descent)
 
-[2] [OpenMP](https://www.openmp.org/)
+- [OpenMP](https://www.openmp.org/)
 
-[3] [MPI](https://www.mpi-forum.org/)
+- [MPI](https://www.mpi-forum.org/)
 
-[4] [oneAPI](https://www.oneapi.com/)
+- [oneAPI](https://www.oneapi.com/)
 
-[5] [CUDA](https://developer.nvidia.com/cuda-zone)
+- [CUDA](https://developer.nvidia.com/cuda-zone)
+
+- [Intel DevCloud](https://www.intel.com/content/www/us/en/developer/tools/devcloud/overview.html)

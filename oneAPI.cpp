@@ -1,5 +1,5 @@
 // f(x1, x2, x3, ..., xM) = theta0 * x0 + theta1 * x1 + theta2 * x2 + ... + thetaM * xM
-#include <sycl/sycl.hpp>
+#include <CL/sycl.hpp>
 #include <iostream>
 #include <iomanip>
 #include <ctime>

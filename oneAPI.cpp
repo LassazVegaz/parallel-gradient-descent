@@ -77,6 +77,16 @@ void printError(float inputs[N][M], float outputs[N], float *theta)
     std::cout << std::fixed << std::setprecision(MAX_DECIMALS) << "error: " << error << std::endl;
 }
 
+void printThetaMapping(float *expectedTheta, float *calculatedTheta)
+{
+    std::cout << "EXPECTED THETA\t->\tCALCULATED THETA" << std::endl;
+
+    for (int i = 0; i < M; i++)
+    {
+        std::cout << expectedTheta[i] << "\t->\t" << calculatedTheta[i] << std::endl;
+    }
+}
+
 int main()
 {
     queue q(gpu_selector_v);
@@ -115,6 +125,9 @@ int main()
         for (int i = 0; i < M; i++)
             theta[i] = newTheta[i];
     }
+
+    // check mapping
+    printThetaMapping(actualTheta, theta);
 
     // check if thetas are accurate
     checkThetaAccuracy(theta, actualTheta);

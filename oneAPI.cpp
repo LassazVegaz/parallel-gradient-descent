@@ -16,9 +16,9 @@
 using namespace sycl;
 
 /// @brief The function we are trying to find coefficients for
-double f(double *x, double *theta)
+float f(float *x, float *theta)
 {
-    double result = 0;
+    float result = 0;
     for (int i = 0; i < M; i++)
     {
         result += theta[i] * x[i];
@@ -26,25 +26,25 @@ double f(double *x, double *theta)
     return result;
 }
 
-void init(double inputs[N][M], double outputs[N], double theta[M])
+void init(float inputs[N][M], float outputs[N], float theta[M])
 {
     srand(time(NULL));
 
     for (int i = 0; i < M; i++)
-        theta[i] = (double)rand() / RAND_MAX;
+        theta[i] = (float)rand() / (float)RAND_MAX;
 
     for (int i = 0; i < N; i++)
     {
         for (int k = 0; k < M; k++)
         {
             // i th data point, k th variable
-            inputs[i][k] = (double)rand() / RAND_MAX;
+            inputs[i][k] = (float)rand() / (float)RAND_MAX;
         }
         outputs[i] = f(inputs[i], theta);
     }
 }
 
-void checkThetaAccuracy(double *theta, double *actualTheta)
+void checkThetaAccuracy(float *theta, float *actualTheta)
 {
     int thetasAreAccurate = 1;
 
@@ -63,13 +63,13 @@ void checkThetaAccuracy(double *theta, double *actualTheta)
         std::cout << "Thetas are not accurate" << std::endl;
 }
 
-void printError(double inputs[N][M], double outputs[N], double *theta)
+void printError(float inputs[N][M], float outputs[N], float *theta)
 {
-    double error = 0;
+    float error = 0;
 
     for (int n = 0; n < N; n++)
     {
-        double h = f(inputs[n], theta);
+        float h = f(inputs[n], theta);
         error += abs(h - outputs[n]);
     }
 
@@ -82,26 +82,26 @@ int main()
     queue q(gpu_selector_v);
     std::cout << "Device: " << q.get_device().get_info<info::device::name>() << std::endl;
 
-    double inputs[N][M];
-    double outputs[N];
-    double actualTheta[M];
+    float inputs[N][M];
+    float outputs[N];
+    float actualTheta[M];
     init(inputs, outputs, actualTheta);
 
     // theta are the coefficients we are trying to find
-    double theta[M];
+    float theta[M];
     for (int i = 0; i < M; i++)
         theta[i] = 0;
 
     for (int i = 0; i < MAX_ITERATIONS; i++)
     {
-        double newTheta[M];
+        float newTheta[M];
 
         for (int k = 0; k < M; k++)
         {
-            double t = 0;
+            float t = 0;
             for (int n = 0; n < N; n++)
             {
-                double h = 0;
+                float h = 0;
                 for (int i = 0; i < M; i++)
                 {
                     h += inputs[n][i] * theta[i];

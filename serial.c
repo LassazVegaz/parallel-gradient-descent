@@ -9,7 +9,7 @@
 #define M 10
 #define N 1000
 #define MAX_ITERATIONS 1000
-#define ALPHA 0.1
+#define ALPHA 0.3
 #define ACCURACY_TORLERANCE 0.001
 
 /// @brief The function we are trying to find coefficients for
@@ -73,6 +73,16 @@ void printError(double inputs[N][M], double outputs[N], double *theta)
     printf("error: %lf\n", error);
 }
 
+void printThetaMapping(double *expectedTheta, double *calculatedTheta)
+{
+    puts("Expected Thetas vs Computed Thetas");
+
+    for (int i = 0; i < M; i++)
+    {
+        printf("%lf -> %lf\n", expectedTheta[i], calculatedTheta[i]);
+    }
+}
+
 int main()
 {
     double inputs[N][M];
@@ -108,6 +118,9 @@ int main()
         for (int i = 0; i < M; i++)
             theta[i] = newTheta[i];
     }
+
+    // print mapping
+    printThetaMapping(actualTheta, theta);
 
     // check if thetas are accurate
     checkThetaAccuracy(theta, actualTheta);

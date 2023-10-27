@@ -8,8 +8,8 @@
 
 #define M 10
 #define N 1000
-#define MAX_ITERATIONS 1000
-#define ALPHA 0.1
+#define MAX_ITERATIONS 10000
+#define ALPHA 0.5
 #define ACCURACY_TORLERANCE 0.0
 
 /// @brief The function we are trying to find coefficients for
@@ -40,12 +40,12 @@ void init(double **inputs, double *outputs, double *theta)
     }
 }
 
-void checkThetaAccuracy(double *theta, double *actualTheta)
+void checkThetaAccuracy(double *expectedTheta, double *theta)
 {
     int thetasAreAccurate = 1;
     for (int i = 0; i < M; i++)
     {
-        if (abs(theta[i] - actualTheta[i]) > ACCURACY_TORLERANCE)
+        if (fabs(theta[i] - expectedTheta[i]) > ACCURACY_TORLERANCE)
         {
             thetasAreAccurate = 0;
             break;
@@ -67,10 +67,20 @@ void printError(double **inputs, double *outputs, double *theta)
         {
             h += inputs[n][i] * theta[i];
         }
-        error += abs(h - outputs[n]);
+        error += fabs(h - outputs[n]);
     }
     error /= N;
     printf("error: %lf\n", error);
+}
+
+void printThetaMapping(double *expectedTheta, double *calculatedTheta)
+{
+    puts("Expected Thetas vs Computed Thetas");
+
+    for (int i = 0; i < M; i++)
+    {
+        printf("%lf -> %lf\n", expectedTheta[i], calculatedTheta[i]);
+    }
 }
 
 int main()
@@ -191,15 +201,16 @@ int main()
     {
         printf("Time taken = %lf\n", endTime - startTime);
 
+        // print mapping
+        printThetaMapping(actualTheta, theta);
+
         // check if thetas are accurate
-        checkThetaAccuracy(theta, actualTheta);
+        checkThetaAccuracy(actualTheta, theta);
 
         // check error
         printError(inputs, outputs, theta);
-    }
 
-    if (rank == 0)
-    {
+        // clean up
         for (int i = 0; i < N; i++)
             free(inputs[i]);
         free(inputs);

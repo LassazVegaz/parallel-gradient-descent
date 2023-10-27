@@ -102,28 +102,43 @@ int main()
     for (int i = 0; i < M; i++)
         theta[i] = 0;
 
-    for (int i = 0; i < MAX_ITERATIONS; i++)
     {
-        float newTheta[M];
+        buffer buf_inputs(*inputs, range(N, M));
+        buffer buf_outputs(outputs, range(N));
+        buffer buf_theta(theta, range(M));
 
-        for (int k = 0; k < M; k++)
+        for (int i = 0; i < MAX_ITERATIONS; i++)
         {
-            float t = 0;
-            for (int n = 0; n < N; n++)
+            float newTheta[M];
             {
-                float h = 0;
-                for (int i = 0; i < M; i++)
-                {
-                    h += inputs[n][i] * theta[i];
-                }
-                t += (h - outputs[n]) * inputs[n][k];
-            }
-            t = theta[k] - ALPHA * t / N;
-            newTheta[k] = t;
-        }
+                buffer buf_newTheta(newTheta, range(M));
 
-        for (int i = 0; i < M; i++)
-            theta[i] = newTheta[i];
+                q.submit([&](handler &h)
+                         {
+                accessor a_inputs(buf_inputs, h, read_only);
+                accessor a_outputs(buf_outputs, h, read_only);
+                accessor a_theta(buf_theta, h, read_only);
+                accessor a_newTheta(buf_newTheta, h, write_only);
+
+                h.parallel_for(range(1), [=](id<1> idx) {
+                    float t = 0;
+                    for (int n = 0; n < N; n++)
+                    {
+                        float h = 0;
+                        for (int i = 0; i < M; i++)
+                        {
+                            h += a_inputs[n][i] * a_theta[i];
+                        }
+                        t += (h - a_outputs[n]) * a_inputs[n][idx];
+                    }
+                    t = a_theta[idx] - ALPHA * t / N;
+                    a_newTheta[idx] = t;
+                }); });
+            }
+
+            for (int i = 0; i < M; i++)
+                theta[i] = newTheta[i];
+        }
     }
 
     // check mapping

@@ -79,11 +79,11 @@ void printError(float inputs[N][M], float outputs[N], float *theta)
 
 void printThetaMapping(float *expectedTheta, float *calculatedTheta)
 {
-    std::cout << "EXPECTED THETA\t->\tCALCULATED THETA" << std::endl;
+    std::cout << "Expected Thetas vs Computed Thetas" << std::endl;
 
     for (int i = 0; i < M; i++)
     {
-        std::cout << expectedTheta[i] << "\t->\t" << calculatedTheta[i] << std::endl;
+        std::cout << expectedTheta[i] << "  ->  " << calculatedTheta[i] << std::endl;
     }
 }
 

@@ -169,7 +169,6 @@ int main()
     double endTime = MPI_Wtime();
 
     free(localInputs);
-    free(localInputs);
     free(localOutputs);
 
     if (rank == 0)
@@ -186,7 +185,6 @@ int main()
         printError(inputs, outputs, theta);
 
         // clean up
-        free(inputs);
         free(inputs);
         free(outputs);
         free(actualTheta);

@@ -43,7 +43,7 @@
         {
             "type": "process",
             "label": "DC Compile MPI",
-            "command": "/glob/development-tools/versions/oneapi/2023.2.0.1/oneapi/mpi/2021.10.0//bin/mpiicc",
+            "command": "/glob/development-tools/versions/oneapi/2023.2.0.1/oneapi/mpi/2021.10.0/bin/mpiicc",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
@@ -54,13 +54,9 @@
             "options": {
                 "cwd": "${fileDirname}"
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-            },
-            "detail": "compiler: mpiicc"
+            "problemMatcher": [],
+            "group": "build",
+            "detail": "Compile current file using MPIICC"
         },
         {
             "type": "process",
@@ -82,7 +78,7 @@
             "dependsOn": [
                 "DC Compile MPI"
             ],
-            "detail": "submission to queue"
+            "detail": "Compile the current file using MPIICC and submit to the queue"
         }
     ],
     "version": "2.0.0"

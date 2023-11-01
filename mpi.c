@@ -8,22 +8,25 @@
 
 #define M 10
 #define N 1000
-#define MAX_ITERATIONS 10000
+#define MAX_ITERATIONS 1000
 #define ALPHA 0.5
 #define ACCURACY_TORLERANCE 0.0
 
 /// @brief The function we are trying to find coefficients for
-double f(double *x, double *theta)
+double f(double *x, int x_row, double *theta)
 {
+    int row = x_row * M;
     double result = 0;
+
     for (int i = 0; i < M; i++)
     {
-        result += theta[i] * x[i];
+        result += theta[i] * x[row + i];
     }
+
     return result;
 }
 
-void init(double **inputs, double *outputs, double *theta)
+void init(double inputs[N * M], double outputs[N], double theta[M])
 {
     srand(time(NULL));
 
@@ -32,11 +35,12 @@ void init(double **inputs, double *outputs, double *theta)
 
     for (int i = 0; i < N; i++)
     {
-        for (int k = 0; k < M; k++)
+        int upper = (i + 1) * M;
+        for (int k = i * M; k < upper; k++)
         {
-            inputs[i][k] = (double)rand() / RAND_MAX;
+            inputs[k] = (double)rand() / RAND_MAX;
         }
-        outputs[i] = f(inputs[i], theta);
+        outputs[i] = f(inputs, i, theta);
     }
 }
 
@@ -57,7 +61,7 @@ void checkThetaAccuracy(double *expectedTheta, double *theta)
         printf("Thetas are not accurate\n");
 }
 
-void printError(double **inputs, double *outputs, double *theta)
+void printError(double inputs[N * M], double outputs[N], double *theta)
 {
     double error = 0;
     for (int n = 0; n < N; n++)
@@ -65,9 +69,9 @@ void printError(double **inputs, double *outputs, double *theta)
         double h = 0;
         for (int i = 0; i < M; i++)
         {
-            h += inputs[n][i] * theta[i];
+            h += inputs[n * M + i] * theta[i];
         }
-        error += fabs(h - outputs[n]);
+        error += abs(h - outputs[n]);
     }
     error /= N;
     printf("error: %lf\n", error);
@@ -91,7 +95,7 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int localN = N / size;
 
-    double **inputs;
+    double *inputs;
     double *outputs;
     double *actualTheta;
 
@@ -101,9 +105,7 @@ int main()
     // init inputs, outputs and actual thetas in rank 0
     if (rank == 0)
     {
-        inputs = malloc(sizeof(double *) * N);
-        for (int i = 0; i < N; i++)
-            inputs[i] = malloc(sizeof(double) * M);
+        inputs = malloc(sizeof(double) * M * N); // a one dimentional two dimentional like array
         outputs = malloc(sizeof(double) * N);
         actualTheta = malloc(sizeof(double) * M);
         init(inputs, outputs, actualTheta);
@@ -113,43 +115,16 @@ int main()
     }
 
     // dynamic arrays to store inputs and outputs in each rank
-    double **localInputs = (double **)malloc(sizeof(double *) * localN); // a multi array
-    for (int i = 0; i < localN; i++)
-        localInputs[i] = (double *)malloc(sizeof(double) * M);
-    double *localOutputs = (double *)malloc(sizeof(double) * localN);
+    double *localInputs = malloc(sizeof(double) * localN * M); // a 2D array like 1D array
+    double *localOutputs = malloc(sizeof(double) * localN);
 
-    // time should be counted from here because data spread if part of MPI
+    // time should be counted from here because data spread is part of MPI
     // if it wasnt MPI, data doesnt need to be spread
     double startTime = MPI_Wtime();
 
-    // send each input row to other ranks
-    // a multidim array cannot be sent as a whole in MPI
-    // but still this is efficient
-    if (rank == 0)
-    {
-        for (int i = 0; i < N;)
-        {
-            int upper = i + localN;
-            int dest = i / localN;
-            for (; i < upper; i++)
-            {
-                int buffSize = sizeof(double) * M + MPI_BSEND_OVERHEAD;
-                double *buff = malloc(buffSize);
-                MPI_Buffer_attach(buff, buffSize);
-                MPI_Bsend(inputs[i], M, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
-                MPI_Buffer_detach(buff, &buffSize);
-                free(buff);
-            }
-        }
-    }
-    // gathering sent inputs
-    for (int i = 0; i < localN; i++)
-    {
-        MPI_Status status;
-        MPI_Recv(localInputs[i], M, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-    }
-
-    // scatter outputs
+    // distribute inputs
+    MPI_Scatter(inputs, localN * M, MPI_DOUBLE, localInputs, localN * M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    // distribute outputs
     MPI_Scatter(outputs, localN, MPI_DOUBLE, localOutputs, localN, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     for (int i = 0; i < MAX_ITERATIONS; i++)
@@ -165,11 +140,12 @@ int main()
             for (int n = 0; n < localN; n++)
             {
                 double h = 0;
+                int inputRow = n * M;
                 for (int i = 0; i < M; i++)
                 {
-                    h += localInputs[n][i] * theta[i];
+                    h += localInputs[inputRow + i] * theta[i];
                 }
-                localT += (h - localOutputs[n]) * localInputs[n][k];
+                localT += (h - localOutputs[n]) * localInputs[inputRow + k];
             }
 
             // reduce all totals into one
@@ -178,7 +154,7 @@ int main()
 
             if (rank == 0)
             {
-                t = theta[k] - ALPHA * localT / N;
+                t = theta[k] - ALPHA * t / N;
                 newTheta[k] = t;
             }
         }
@@ -192,8 +168,7 @@ int main()
 
     double endTime = MPI_Wtime();
 
-    for (int i = 0; i < localN; i++)
-        free(localInputs[i]);
+    free(localInputs);
     free(localInputs);
     free(localOutputs);
 
@@ -211,8 +186,7 @@ int main()
         printError(inputs, outputs, theta);
 
         // clean up
-        for (int i = 0; i < N; i++)
-            free(inputs[i]);
+        free(inputs);
         free(inputs);
         free(outputs);
         free(actualTheta);

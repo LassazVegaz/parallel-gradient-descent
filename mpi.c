@@ -10,7 +10,7 @@
 #define N 1000
 #define MAX_ITERATIONS 1000
 #define ALPHA 0.5
-#define ACCURACY_TORLERANCE 0.0
+#define ACCURACY_TORLERANCE 0.0001
 
 /// @brief The function we are trying to find coefficients for
 double f(double *x, int x_row, double *theta)

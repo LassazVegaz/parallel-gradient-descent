@@ -67,9 +67,10 @@ void printError(double inputs[N * M], double outputs[N], double *theta)
     for (int n = 0; n < N; n++)
     {
         double h = 0;
+        int inputRow = n * M;
         for (int i = 0; i < M; i++)
         {
-            h += inputs[n * M + i] * theta[i];
+            h += inputs[inputRow + i] * theta[i];
         }
         error += abs(h - outputs[n]);
     }
